@@ -1,6 +1,7 @@
 **/.env
 
 /backend/bin/
+/backend/testdata/
 
 /frontend/# Logs
 /frontend/logs
