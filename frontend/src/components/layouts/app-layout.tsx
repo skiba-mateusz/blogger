@@ -6,8 +6,8 @@ export function AppLayout({ children }: React.PropsWithChildren) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="p-2">
-        <SidebarTrigger />
+      <main className="p-2 w-full">
+        <SidebarTrigger className="mb-2" />
         {children}
       </main>
     </SidebarProvider>

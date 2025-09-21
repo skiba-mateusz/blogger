@@ -6,6 +6,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+	"github.com/mateusz-skiba/blogger/env"
 	"github.com/mateusz-skiba/blogger/store"
 	"go.uber.org/zap"
 )
@@ -37,13 +39,26 @@ func (s *server) mount() http.Handler {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+		r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{env.GetString("FRONTEND_URL", "http://localhost:5173")},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", s.healthCheckHandler)
 
 		r.Route("/blogs", func(r chi.Router) {
-			r.Get("/{id}", s.getBlogHandler)
+			r.Get("/", s.listBlogsHandler)
+
+
+			r.Route("/{id}", func(r chi.Router) {
+				r.Get("/{id}", s.getBlogHandler)
+			})
 		})
 	})
 
