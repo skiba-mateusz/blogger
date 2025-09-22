@@ -34,13 +34,39 @@ func (s *server) getBlogHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) listBlogsHandler(w http.ResponseWriter, r *http.Request) {
-	blogs, err := s.store.Blogs.ListBlogs(r.Context())
+	query := store.PaginatedBlogsQuery{
+		SearchQuery: "",
+		Limit: 5,
+		Offset: 0,
+	}
+
+	query, err := query.Parse(r)
+	if err != nil {
+		s.badRequestError(w, err)
+		return
+	}
+
+	if err := Validate.Struct(query); err != nil {
+		s.badRequestError(w, err)
+		return
+	}
+
+
+	blogs, meta, err := s.store.Blogs.ListBlogs(r.Context(), query)
 	if err != nil {
 		s.internalServerError(w)
 		return
 	}
 
-	if err := s.jsonResponse(w, http.StatusOK, blogs); err != nil {
+	paginatedResponse  := struct{
+		Items []store.Blog `json:"items"`
+		Meta  store.Meta `json:"meta"`
+	} {
+		Items: blogs,
+		Meta:  meta,
+	}
+
+	if err := s.jsonResponse(w, http.StatusOK, paginatedResponse); err != nil {
 		s.internalServerError(w)
 	}
 }

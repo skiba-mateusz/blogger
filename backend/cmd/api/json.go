@@ -9,7 +9,6 @@ import (
 
 var Validate *validator.Validate
 
-
 func init() {
 	Validate = validator.New(validator.WithRequiredStructEnabled())
 }

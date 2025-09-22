@@ -15,7 +15,7 @@ var (
 type Store struct {
 	Blogs interface {
 		GetById(ctx context.Context, id int64) (*Blog, error)
-		ListBlogs(ctx context.Context) ([]Blog, error)
+		ListBlogs(ctx context.Context, q PaginatedBlogsQuery) ([]Blog, Meta, error)
 	}
 }
 

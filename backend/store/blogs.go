@@ -53,21 +53,29 @@ func (s *BlogStore) GetById(ctx context.Context, id int64) (*Blog, error) {
 	return &blog ,nil
 }
 
-func (s *BlogStore) ListBlogs(ctx context.Context) ([]Blog, error) {
+func (s *BlogStore) ListBlogs(ctx context.Context, q PaginatedBlogsQuery) ([]Blog, Meta, error) {
 	query := `
 		SELECT 
-			id, user_id, title, left(content, 300) as content, created_at, updated_at
+			b.id, b.user_id, b.title, left(b.content, 300) as content, b.created_at, b.updated_at,
+			COUNT(*) OVER() AS total
 		FROM
-			blogs
+			blogs b
+		WHERE 
+			(b.title ILIKE '%' || $1 || '%' OR b.content ILIKE '%' || $1 || '%')
+		LIMIT
+			$2
+		OFFSET
+			$3
 	`
 
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
 	defer cancel()
 
 	blogs := []Blog{}
-	rows, err := s.db.QueryContext(ctx, query)
+	meta := Meta{}
+	rows, err := s.db.QueryContext(ctx, query, q.SearchQuery, q.Limit, q.Offset)
 	if err != nil {
-		return nil, err
+		return nil, meta, err
 	}
 
 	for rows.Next() {
@@ -79,16 +87,22 @@ func (s *BlogStore) ListBlogs(ctx context.Context) ([]Blog, error) {
 			&blog.Content,
 			&blog.CreatedAt,
 			&blog.UpdatedAt,
+			&meta.TotalCount,
 		)
 		if err != nil {
-			return nil, err
+			return nil, meta, err
 		}
 		blogs = append(blogs, blog)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, meta, err
 	}
 
-	return blogs ,nil
+	meta.TotalPages = (meta.TotalCount + q.Limit - 1) / q.Limit
+	meta.CurrentPage = (q.Offset / q.Limit) + 1
+	meta.Offset = q.Offset
+	meta.Limit = q.Limit
+
+	return blogs, meta, nil
 }
