@@ -57,7 +57,7 @@ func (s *server) mount() http.Handler {
 
 
 			r.Route("/{id}", func(r chi.Router) {
-				r.Get("/{id}", s.getBlogHandler)
+				r.Get("/", s.getBlogHandler)
 			})
 		})
 	})
