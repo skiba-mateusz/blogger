@@ -19,7 +19,7 @@ export function BlogPreview({ blog }: { blog: Blog }) {
         <Link to={`/app/users/${blog.userId}`} className="w-fit relative z-30">
           <Avatar className="hover:scale-105 duration-200">
             <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>JD</AvatarFallback>
+            <AvatarFallback>{blog.user.username}</AvatarFallback>
           </Avatar>
         </Link>
         <CardTitle className="text-3xl">{blog.title}</CardTitle>

@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Loader, SearchIcon, TriangleAlert } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
-import { useBlogs } from "@/features/blogs/api/get-blog";
+import { useBlogs } from "@/features/blogs/api/get-blogs";
 import { BlogPreview } from "@/features/blogs/components/blog-preview";
 import { Button } from "@/components/ui/button";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";

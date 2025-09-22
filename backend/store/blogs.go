@@ -17,16 +17,22 @@ type Blog struct {
 	Content string `json:"content"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
+	User User `json:"user"`
 }
 
 func (s *BlogStore) GetById(ctx context.Context, id int64) (*Blog, error) {
 	query := `
 		SELECT 
-			id, user_id, title, content, created_at, updated_at
+			b.id, b.user_id, b.title, b.content, b.created_at, b.updated_at,
+			u.id, u.username
 		FROM
-			blogs
+			blogs b
+		INNER JOIN
+			users u 
+		ON 
+			u.id = b.user_id
 		WHERE
-			id = $1
+			b.id = $1
 	`
 
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
@@ -40,6 +46,8 @@ func (s *BlogStore) GetById(ctx context.Context, id int64) (*Blog, error) {
 		&blog.Content,
 		&blog.CreatedAt,
 		&blog.UpdatedAt,
+		&blog.User.Id,
+		&blog.User.Username,
 	)
 	if err != nil {
 		switch {
@@ -57,9 +65,14 @@ func (s *BlogStore) ListBlogs(ctx context.Context, q PaginatedBlogsQuery) ([]Blo
 	query := `
 		SELECT 
 			b.id, b.user_id, b.title, left(b.content, 300) as content, b.created_at, b.updated_at,
+			u.id, u.username, 
 			COUNT(*) OVER() AS total
 		FROM
 			blogs b
+		INNER JOIN
+			users u 
+		ON 
+			u.id = b.user_id
 		WHERE 
 			(b.title ILIKE '%' || $1 || '%' OR b.content ILIKE '%' || $1 || '%')
 		LIMIT
@@ -87,6 +100,8 @@ func (s *BlogStore) ListBlogs(ctx context.Context, q PaginatedBlogsQuery) ([]Blo
 			&blog.Content,
 			&blog.CreatedAt,
 			&blog.UpdatedAt,
+			&blog.User.Id,
+			&blog.User.Username,
 			&meta.TotalCount,
 		)
 		if err != nil {

@@ -1,3 +1,11 @@
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Blog {
   id: number;
   userId: number;
@@ -5,6 +13,7 @@ export interface Blog {
   content: string;
   createdAt: Date;
   updatedAt: Date;
+  user: User;
 }
 
 export interface PaginatedResponse<T> {
