@@ -121,4 +121,8 @@
   [role="button"] {
     cursor: pointer;
   }
+  pre code {
+    border-radius: 0.25rem;
+    scrollbar-width: thin;
+  }
 }

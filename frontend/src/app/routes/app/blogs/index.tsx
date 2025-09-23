@@ -8,7 +8,7 @@ import { BlogPreview } from "@/features/blogs/components/blog-preview";
 import { Button } from "@/components/ui/button";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 
-export function BlogRoute() {
+export function BlogsRoute() {
   const { blogs, isLoading, isLoadingMore, isError, hasMore, loadMore } =
     useBlogs();
   const { sentinelRef } = useInfiniteScroll({
