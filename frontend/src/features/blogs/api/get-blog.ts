@@ -20,6 +20,7 @@ export function useBlog() {
     const fetchBlog = async () => {
       try {
         setIsError(false);
+        setIsLoading(true);
         const data = await getBlog(id);
         setBlog(data);
       } catch (err) {
