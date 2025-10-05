@@ -30,3 +30,20 @@ api.interceptors.response.use(
   },
   (error) => Promise.reject(error)
 );
+
+export function handleAxiosError(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    if (error.response) {
+      return (
+        error.response.data?.error ||
+        `Error ${error.response.status}: ${error.response.statusText}`
+      );
+    } else if (error.request) {
+      return "No response from server. Please check your connection.";
+    } else {
+      return `Request error: ${error.message}`;
+    }
+  }
+
+  return "An unexpected error occurred.";
+}

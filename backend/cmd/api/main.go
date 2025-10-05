@@ -1,7 +1,10 @@
 package main
 
 import (
+	"time"
+
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/mateusz-skiba/blogger/auth"
 	"github.com/mateusz-skiba/blogger/db"
 	"github.com/mateusz-skiba/blogger/env"
 	"github.com/mateusz-skiba/blogger/store"
@@ -17,6 +20,11 @@ func main() {
 			maxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 30),
 			maxIdleConns: env.GetInt("DB_MAX_IDLE_CONNS", 15),
 			maxIdleTime: env.GetString("DB_MAX_IDLE_TIME", "15m"),
+		},
+		auth: authConfig{
+			secret: env.GetString("AUTH_SECRET", "supersecret"),
+			exp: time.Hour * 24 * 3,
+			iss: "blogger",
 		},
 	}
 
@@ -36,11 +44,17 @@ func main() {
 	logger.Info("database connection pool established")
 
 	store := store.New(db)
+	authenticator := auth.NewJwtAuthenticator(
+		cfg.auth.secret,
+		cfg.auth.iss,
+		cfg.auth.iss,
+	)
 
 	srv := &server{
 		config: cfg,
 		store: store,
 		logger: logger,
+		authenticator: authenticator,
 	}
 
 	mux := srv.mount()

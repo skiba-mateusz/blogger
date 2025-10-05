@@ -4,6 +4,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { Root } from "./routes/app/root";
+import { ProtectedRoute } from "./routes/app/protected";
 
 const router = createBrowserRouter([
   {
@@ -11,8 +12,26 @@ const router = createBrowserRouter([
     element: <Navigate to="/app" />,
   },
   {
+    path: "/auth/login",
+    lazy: async () => {
+      const { LoginRoute } = await import("./routes/auth/login");
+      return { Component: LoginRoute };
+    },
+  },
+  {
+    path: "/auth/register",
+    lazy: async () => {
+      const { RegisterRoute } = await import("./routes/auth/register");
+      return { Component: RegisterRoute };
+    },
+  },
+  {
     path: "/app",
-    element: <Root />,
+    element: (
+      <ProtectedRoute>
+        <Root />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: "",

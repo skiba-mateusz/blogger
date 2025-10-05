@@ -17,7 +17,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 
 const items = [
   {
@@ -28,7 +29,14 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const { logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    await logout();
+    navigate("/app");
+  }
 
   return (
     <Sidebar variant="floating">
@@ -71,7 +79,7 @@ export function AppSidebar() {
                 <DropdownMenuItem>
                   <span>Account</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
                   <span>Sign out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>

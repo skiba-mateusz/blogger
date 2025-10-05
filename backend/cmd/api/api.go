@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/mateusz-skiba/blogger/auth"
 	"github.com/mateusz-skiba/blogger/env"
 	"github.com/mateusz-skiba/blogger/store"
 	"go.uber.org/zap"
@@ -15,6 +16,7 @@ import (
 type server struct {
 	config config
 	store store.Store
+	authenticator auth.Authenticator
 	logger *zap.SugaredLogger
 }
 
@@ -22,6 +24,7 @@ type config struct {
 	addr string
 	env string
 	db dbConfig
+	auth authConfig
 }
 
 type dbConfig struct {
@@ -29,6 +32,12 @@ type dbConfig struct {
 	maxOpenConns int
 	maxIdleConns int
 	maxIdleTime string
+}
+
+type authConfig struct {
+	secret string
+	exp time.Duration
+	iss string
 }
 
 
@@ -59,6 +68,18 @@ func (s *server) mount() http.Handler {
 			r.Route("/{id}", func(r chi.Router) {
 				r.Get("/", s.getBlogHandler)
 			})
+		})
+
+		r.Route("/users", func(r chi.Router) {
+			r.Use(s.authMiddleware)
+
+			r.Get("/current", s.getCurrentUserHandler)
+		})
+
+		r.Route("/auth", func(r chi.Router) {
+			r.Post("/login", s.loginUserHandler)
+			r.Post("/register", s.registerUserHandler)
+			r.Post("/logout", s.logoutUserHandler)
 		})
 	})
 

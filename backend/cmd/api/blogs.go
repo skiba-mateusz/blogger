@@ -13,7 +13,7 @@ func (s *server) getBlogHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		s.internalServerError(w)
+		s.internalServerError(w, r, err)
 		return
 	}
 
@@ -21,15 +21,15 @@ func (s *server) getBlogHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, store.ErrNotFound):
-			s.notFoundError(w)
+			s.notFoundError(w, r, err)
 		default:
-			s.internalServerError(w)
+			s.internalServerError(w, r, err)
 		}
 		return
 	}
 
 	if err := s.jsonResponse(w, http.StatusOK, blog); err != nil {
-		s.internalServerError(w)
+		s.internalServerError(w, r, err)
 	}
 }
 
@@ -42,19 +42,19 @@ func (s *server) listBlogsHandler(w http.ResponseWriter, r *http.Request) {
 
 	query, err := query.Parse(r)
 	if err != nil {
-		s.badRequestError(w, err)
+		s.badRequestError(w, r, err)
 		return
 	}
 
 	if err := Validate.Struct(query); err != nil {
-		s.badRequestError(w, err)
+		s.badRequestError(w, r, err)
 		return
 	}
 
 
 	blogs, meta, err := s.store.Blogs.ListBlogs(r.Context(), query)
 	if err != nil {
-		s.internalServerError(w)
+		s.internalServerError(w, r, err)
 		return
 	}
 
@@ -67,6 +67,6 @@ func (s *server) listBlogsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.jsonResponse(w, http.StatusOK, paginatedResponse); err != nil {
-		s.internalServerError(w)
+		s.internalServerError(w, r, err)
 	}
 }

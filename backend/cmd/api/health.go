@@ -9,6 +9,6 @@ func (s *server) healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.jsonResponse(w, http.StatusOK, data); err != nil {
-		s.internalServerError(w)
+		s.internalServerError(w, r, err)
 	}
 }

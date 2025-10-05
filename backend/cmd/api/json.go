@@ -29,6 +29,12 @@ func sendError(w http.ResponseWriter, status int, message string) error {
 	return writeJSON(w, status, &envelope{Error: message})
 }
 
+func readJSON(r *http.Request, data any) error {
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	return decoder.Decode(data)
+}
+
 func writeJSON(w http.ResponseWriter, status int, data any) error {
 	w.Header().Add("Content-type", "application/json")
 	w.WriteHeader(status)
